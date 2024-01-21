@@ -73,4 +73,9 @@ module Garnet
     @_services.each_value(&:finalize!)
     @_services.freeze
   end
+
+  def self.shutdown
+    @_services.each_value(&:shutdown!)
+    app.shutdown!
+  end
 end

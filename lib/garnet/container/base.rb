@@ -4,8 +4,29 @@ module Garnet
   class Container < Dry::System::Container
     include Utils::Namespace
 
+    DEFAULT_ACTOR_WAIT_BEFORE_KILL = 30 # second
+
     class << self
+      def shutdown!
+        super
+        shutdown_actors!
+      end
+
+      def actor_wait_before_kill
+        ENV['GARNET_ACTOR_WAIT_BEFORE_KILL'] || DEFAULT_ACTOR_WAIT_BEFORE_KILL
+      end
+
       protected
+
+      def shutdown_actors!
+        each_key do |key|
+          next unless key =~ /^actors\./
+
+          actor = self[key]
+          actor.stop
+          actor.join(actor_wait_before_kill)
+        end
+      end
 
       def setup_env(klass)
         klass.use :env, inferrer: -> { ENV.fetch('GARNET_ENV', :development).to_sym }

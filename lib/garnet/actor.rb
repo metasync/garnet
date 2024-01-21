@@ -13,10 +13,11 @@ module Garnet
 
     def request(action, **data)
       enqueue({ action:, data: })
-      # enqueue(req.merge(action: action))
     end
 
-    def stop = enqueue({ action: :shutdown })
+    def stop
+      enqueue({ action: :shutdown })
+    end
 
     def kill = @actor.kill
 
@@ -49,20 +50,29 @@ module Garnet
 
     def run_action_loop
       run_action while @running
-      shutdown
+      logger.info "Completed shutdown of #{self.class.name}"
     end
 
     def run_action
       message = @input_queue.pop
-      raise NoActionError, "The given action is NOT defined:  #{message[:action]}" unless respond_to?(message[:action])
+      action = message[:action]
+      raise NoActionError, "Undefined action: #{action}" unless respond_to?(action, include_all: true)
 
-      message[:result] = send(message[:action]).call(message[:data])
+      message[:result] = run_action!(action, message[:data])
     rescue StandardError => e
       logger.error pretty_exception(e)
       Failure(e)
     end
 
-    def shutdown(*_args)
+    def run_action!(action, data)
+      if action == :shutdown
+        shutdown
+      else
+        send(action).call(data)
+      end
+    end
+
+    def shutdown
       @running = false
     end
   end
