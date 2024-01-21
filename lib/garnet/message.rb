@@ -24,11 +24,9 @@ module Garnet
 
       protected
 
-      def define_receiver(receiver)
-        service_name, actor_name = receiver.split('.', 2)
-
+      def define_receiver(name)
         define_method(:receiver) do
-          Garnet.service(service_name)[actor_name]
+          @receiver ||= Garnet.actor(name)
         end
       end
     end
