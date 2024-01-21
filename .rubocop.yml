@@ -1,7 +1,8 @@
-inherit_from: .rubocop_todo.yml
-
 AllCops:
   TargetRubyVersion: 3.3
 
 Layout/LineLength:
   Max: 120
+
+Style/Documentation:
+  Enabled: false
