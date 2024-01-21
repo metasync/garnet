@@ -9,7 +9,7 @@ module Garnet
   # Actor Errors
   class Actor
     class JoinError < Error; end
-    class NoActionError; end
+    class NoActionError < Error; end
   end
 
   # Message Errors
