@@ -8,7 +8,7 @@ module Garnet
 
   # Actor Errors
   class Actor
-    class JoinError < Error; end
+    class WaitError < Error; end
     class NoActionError < Error; end
   end
 

@@ -5,8 +5,8 @@ module Garnet
     include Dry::Monads[:result]
     include Garnet::Utils::PrettyPrint
 
-    def initialize
-      @input_queue = Queue.new
+    def initialize(**opts)
+      @input_queue = opts[:input_queue] || Queue.new
       @running = true
       @actor = Thread.new { run_action_loop }
     end
@@ -17,15 +17,15 @@ module Garnet
 
     def stop(max_wait = nil)
       shutdown
-      join(max_wait)
+      wait_for_termination(max_wait)
     end
 
     def shutdown
       @running = false
     end
 
-    def join(max_wait = nil)
-      raise JoinError, 'Worker CANNOT join itself.' if @actor == Thread.current
+    def wait_for_termination(max_wait = nil)
+      raise WaitError, 'Worker CANNOT wait itself.' if @actor == Thread.current
       return true unless @actor.join(max_wait).nil?
 
       kill and return false
