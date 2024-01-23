@@ -15,11 +15,14 @@ module Garnet
       enqueue({ action:, data: })
     end
 
-    def stop
-      enqueue({ action: :shutdown })
+    def stop(max_wait = nil)
+      shutdown
+      join(max_wait)
     end
 
-    def kill = @actor.kill
+    def shutdown
+      @running = false
+    end
 
     def join(max_wait = nil)
       raise JoinError, 'Worker CANNOT join itself.' if @actor == Thread.current
@@ -28,10 +31,7 @@ module Garnet
       kill and return false
     end
 
-    def dispose(max_wait = nil)
-      stop
-      join(max_wait)
-    end
+    def kill = @actor.kill
 
     def alive?
       @actor&.alive?
@@ -58,22 +58,10 @@ module Garnet
       action = message[:action]
       raise NoActionError, "Undefined action: #{action}" unless respond_to?(action, include_all: true)
 
-      message[:result] = run_action!(action, message[:data])
+      message[:result] = send(action).call(message[:data])
     rescue StandardError => e
       logger.error pretty_exception(e)
       Failure(e)
-    end
-
-    def run_action!(action, data)
-      if action == :shutdown
-        shutdown
-      else
-        send(action).call(data)
-      end
-    end
-
-    def shutdown
-      @running = false
     end
   end
 end

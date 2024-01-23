@@ -20,11 +20,7 @@ module Garnet
 
       def shutdown_actors!
         each_key do |key|
-          next unless key =~ /^actors\./
-
-          actor = self[key]
-          actor.stop
-          actor.join(actor_wait_before_kill)
+          self[key].stop(actor_wait_before_kill) if key =~ /^actors\./
         end
       end
 
