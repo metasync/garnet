@@ -11,9 +11,7 @@ module Garnet
       @actor = Thread.new { run_action_loop }
     end
 
-    def request(action, **data)
-      enqueue({ action:, data: })
-    end
+    def request(action, **data) = enqueue({ action:, data: })
 
     def stop(max_wait = nil)
       shutdown
@@ -26,9 +24,14 @@ module Garnet
 
     def wait_for_termination(max_wait = nil)
       raise WaitError, 'Worker CANNOT wait itself.' if @actor == Thread.current
-      return true unless @actor.join(max_wait).nil?
 
-      kill and return false
+      if @actor.join(max_wait).nil?
+        kill
+        false
+      else
+        logger.info "Completed shutdown of #{self.class.name}"
+        true
+      end
     end
 
     def kill = @actor.kill
@@ -50,7 +53,6 @@ module Garnet
 
     def run_action_loop
       run_action while @running
-      logger.info "Completed shutdown of #{self.class.name}"
     end
 
     def run_action
