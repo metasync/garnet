@@ -11,23 +11,16 @@ module Garnet
     class << self
       def from(sender)
         define_method(:from) { sender.to_sym }
+        define_method(:sender) { @sender ||= Garnet.actor(sender) }
       end
 
       def to(receiver)
         define_method(:to) { receiver.to_sym }
-        define_receiver(receiver)
+        define_method(:receiver) { @receiver ||= Garnet.actor(receiver) }
       end
 
       def action(action_name)
         define_method(:action) { action_name.to_sym }
-      end
-
-      protected
-
-      def define_receiver(name)
-        define_method(:receiver) do
-          @receiver ||= Garnet.actor(name)
-        end
       end
     end
 
