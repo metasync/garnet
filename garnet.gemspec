@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = 'Actor-based service object framework'
   spec.homepage = 'https://github.com/metasync/garnet'
   spec.license = 'MIT'
-  spec.required_ruby_version = '>= 3.3'
+  spec.required_ruby_version = '>= 3.2'
 
   spec.metadata['allowed_push_host'] = 'https://rubygems.org'
 
