@@ -49,9 +49,9 @@ module Garnet
 
     def deliver_message(data)
       data.merge(
-        from:,
-        message_id: ULID.generate,
-        delivered_at: Time.now
+        __from: from,
+        __message_id: ULID.generate,
+        __delivered_at: Time.now
       ).tap do |message|
         receiver.request(action, **message)
       end
