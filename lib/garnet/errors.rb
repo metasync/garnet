@@ -7,7 +7,7 @@ module Garnet
   class AppLoadError < Error; end
 
   # Actor Errors
-  class Actor
+  module Actor
     class WaitError < Error; end
     class NoActionError < Error; end
   end

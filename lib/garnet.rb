@@ -10,7 +10,6 @@ require_relative 'garnet/message'
 require_relative 'garnet/container'
 require_relative 'garnet/action'
 require_relative 'garnet/actor'
-require_relative 'garnet/actor_pool'
 require_relative 'garnet/errors'
 require_relative 'garnet/provider_sources'
 
