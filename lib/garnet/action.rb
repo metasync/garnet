@@ -22,9 +22,7 @@ module Garnet
     def contract_defined? = self.class.method_defined?(:contract)
 
     def call(params)
-      validate_contract(params).fmap do |p|
-        Success(handle(p.to_h))
-      end
+      validate_contract(params).fmap { |p| handle(p.to_h) }
     rescue StandardError => e
       handle_exception(e)
     end
