@@ -3,6 +3,20 @@
 module Garnet
   module Actor
     class Pool
+      class << self
+        def actor_class(klass)
+          define_method(:actor_class) { klass }
+        end
+
+        def size(pool_size = 0, &blk)
+          if block_given?
+            define_method(:size, &blk)
+          else
+            define_method(:size) { pool_size }
+          end
+        end
+      end
+
       def initialize
         @input_queue = Queue.new
         @actors = Set.new
@@ -20,14 +34,20 @@ module Garnet
       def request(action, **data) = enqueue({ action:, data: })
 
       def stop(max_wait = nil)
+        logger.info "Shutting down #{self.class.name}"
         shutdown
-        logger.info "Completed shutdown of #{self.class.name}" if wait_for_termination(max_wait).all?
+        wait_for_termination(max_wait)
       end
 
       def shutdown = @actors.each(&:shutdown)
 
       def wait_for_termination(max_wait = nil)
         results = @actors.map { |a| a.wait_for_termination(max_wait) }
+        if results.all?
+          logger.info "Completed shutdown of #{self.class.name}"
+        else
+          logger.info "Forced to shutdown #{self.class.name}"
+        end
         @actors.clear
         results
       end
@@ -38,11 +58,11 @@ module Garnet
 
       protected
 
-      def create_actors
-        size.times do
-          @actors << actor_class.new(input_queue: @input_queue)
-        end
-      end
+      def create_actors =
+        size.times { @actors << actor_class.new(**actor_options) }
+
+      def actor_options =
+        { input_queue: @input_queue }
 
       def enqueue(message)
         @input_queue.push(message)

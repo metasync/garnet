@@ -15,12 +15,14 @@ module Garnet
       def request(action, **data) = enqueue({ action:, data: })
 
       def stop(max_wait = nil)
+        logger.info "Shutting down #{self.class.name}"
         shutdown
         wait_for_termination(max_wait)
       end
 
       def shutdown
         @running = false
+        request(:no_op)
       end
 
       def wait_for_termination(max_wait = nil)
@@ -28,6 +30,7 @@ module Garnet
 
         if @actor.join(max_wait).nil?
           kill
+          logger.info "Forced to shutdown #{self.class.name} after waiting for #{max_wait} seconds"
           false
         else
           logger.info "Completed shutdown of #{self.class.name}"
@@ -35,15 +38,12 @@ module Garnet
         end
       end
 
-      def kill = @actor.kill
+      def kill = @actor&.kill
 
-      def alive?
-        @actor&.alive?
-      end
+      def alive? = @actor&.alive?
 
-      def inspect
+      def inspect =
         "#<#{self.class}:0x#{(object_id << 1).to_s(16)} #{alive? ? 'alive' : 'dead'}>"
-      end
 
       protected
 
@@ -58,14 +58,25 @@ module Garnet
 
       def run_action
         message = @input_queue.pop
-        action = message[:action]
+        run_action!(**message).tap do |result|
+          if message[:data].key?(:__callback)
+            callback = message[:data][:__callback]
+            actor_name = message[:data][:__from]
+            Garnet.actor(actor_name).request(callback, data: result) unless callback.nil?
+          end
+        end
+      end
+
+      def run_action!(action:, data:)
         raise NoActionError, "Undefined action: #{action}" unless respond_to?(action, include_all: true)
 
-        message[:result] = send(action).call(message[:data])
+        send(action).call(data)
       rescue StandardError => e
         logger.error pretty_exception(e)
         Failure(e)
       end
+
+      def no_op = proc {}
     end
   end
 end
