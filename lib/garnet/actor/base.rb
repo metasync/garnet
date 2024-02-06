@@ -62,7 +62,7 @@ module Garnet
           if message[:data].key?(:__callback)
             callback = message[:data][:__callback]
             actor_name = message[:data][:__from]
-            Garnet.actor(actor_name).request(callback, data: result) unless callback.nil?
+            Garnet.actor(actor_name).request(callback, request: message, result:) unless callback.nil?
           end
         end
       end
