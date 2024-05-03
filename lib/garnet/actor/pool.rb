@@ -8,9 +8,9 @@ module Garnet
           define_method(:actor_class) { klass }
         end
 
-        def size(pool_size = 0, &blk)
+        def size(pool_size = 0, &)
           if block_given?
-            define_method(:size, &blk)
+            define_method(:size, &)
           else
             define_method(:size) { pool_size }
           end
@@ -58,11 +58,13 @@ module Garnet
 
       protected
 
-      def create_actors =
+      def create_actors
         size.times { @actors << actor_class.new(**actor_options) }
+      end
 
-      def actor_options =
+      def actor_options
         { input_queue: @input_queue }
+      end
 
       def enqueue(message)
         @input_queue.push(message)

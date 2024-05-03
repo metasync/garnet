@@ -19,11 +19,13 @@ module Garnet
         define_method(:receiver) { @receiver ||= Garnet.actor(receiver) }
       end
 
-      def action(action_name) =
+      def action(action_name)
         define_method(:action) { action_name.to_sym }
+      end
 
-      def callback(action_name) =
+      def callback(action_name)
         define_method(:callback) { action_name.to_sym }
+      end
     end
 
     %i[from sender to receiver action].each do |meth|
@@ -50,12 +52,13 @@ module Garnet
 
     protected
 
-    def validate_contract(data) =
+    def validate_contract(data)
       if contract_defined?
         contract.call(data).to_monad
       else
         Success(data)
       end
+    end
 
     def deliver_message(data)
       data.merge(

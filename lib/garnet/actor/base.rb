@@ -42,8 +42,9 @@ module Garnet
 
       def alive? = @actor&.alive?
 
-      def inspect =
+      def inspect
         "#<#{self.class}:0x#{(object_id << 1).to_s(16)} #{alive? ? 'alive' : 'dead'}>"
+      end
 
       protected
 

@@ -59,7 +59,7 @@ module Garnet
     ENV['GARNET_ENV'] ||= 'development'
 
     require 'bundler'
-    Bundler.setup(:default, ENV['GARNET_ENV'])
+    Bundler.setup(:default, ENV.fetch('GARNET_ENV', nil))
   end
 
   def self.prepare(...)

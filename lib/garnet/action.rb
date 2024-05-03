@@ -30,11 +30,12 @@ module Garnet
     protected
 
     def validate_contract(params)
-      = if contract_defined?
-          contract.call(params).to_monad
-        else
-          Success(params)
-        end
+      if contract_defined?
+        contract.call(params).to_monad
+      else
+        Success(params)
+      end
+    end
 
     def handle(params)
       raise NotImplementedError, "#{self.class.name}##{__method__} is an abstract method."

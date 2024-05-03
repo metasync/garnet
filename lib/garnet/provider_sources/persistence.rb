@@ -13,8 +13,9 @@ module Garnet
         def named? = !config.name.nil?
         def name_prefix = named? ? "persistence.#{config.name}." : 'persistence.'
 
-        def namespace_suffix =
+        def namespace_suffix
           named? ? "::#{target.config.inflector.classify(config.name)}" : ''
+        end
 
         def sql_log_enabled? = config.enable_sql_log
 

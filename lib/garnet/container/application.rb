@@ -35,8 +35,9 @@ module Garnet
       end
       # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
-      def setup_inflector(klass) =
+      def setup_inflector(klass)
         klass.register('inflector', config.inflector)
+      end
     end
   end
 end
