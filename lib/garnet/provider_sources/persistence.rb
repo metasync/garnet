@@ -6,7 +6,8 @@ module Garnet
       class Source < Dry::System::Provider::Source
         setting :name, constructor: Dry.Types::String.optional
         setting :db_user, constructor: Dry.Types::String.constrained(filled: true)
-        setting :db_password, constructor: Dry.Types::String.constrained(filled: true)
+        setting :db_password, constructor: Dry.Types::String.optional
+        setting :db_password_encrypted, constructor: Dry.Types::String.optional
         setting :database_url, constructor: Dry.Types::String.constrained(filled: true)
         setting :enable_sql_log, default: false, constructor: Dry.Types::Params::Bool.optional
 
@@ -35,13 +36,26 @@ module Garnet
           register "#{name_prefix}rom", ROM.container(rom_config)
         end
 
+        def db_password
+          if config.db_password_encrypted.nil? ||
+             config.db_password_encrypted.empty?
+            config.db_password
+          else
+            db_password_decrypted
+          end
+        end
+
+        def db_password_decrypted
+          Utils::Cipher.new.decrypt(config.db_password_encrypted)
+        end
+
         protected
 
         def create_rom_config
           ROM::Configuration.new(
             :sql, config.database_url,
             username: config.db_user,
-            password: config.db_password,
+            password: db_password,
             migrator: { path: Pathname('db/migrate').join(config.name.to_s) }
           )
         end
