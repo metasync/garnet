@@ -2,3 +2,4 @@
 
 require_relative 'utils/namespace'
 require_relative 'utils/pretty_print'
+require_relative 'utils/cipher'
